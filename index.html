@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>鍛冶屋RPG 仕様書 完全版</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DotGothic16&display=swap');
+:root { --px: 'DotGothic16', monospace; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--px); background: #0e0e16; color: #c8c0a8; min-height: 100vh; padding: 16px 8px 60px; max-width: 720px; margin: 0 auto; }
+h1 { font-size: 18px; color: #c8a030; margin-bottom: 4px; letter-spacing: 2px; }
+.ver { font-size: 10px; color: #4a4030; margin-bottom: 24px; letter-spacing: 1px; }
+/* tabs */
+.tabs { display: flex; flex-wrap: wrap; gap: 0; margin-bottom: 16px; border-bottom: 1px solid #2a2418; position: sticky; top: 0; background: #0e0e16; z-index: 10; padding-top: 4px; }
+.tab { padding: 7px 11px; font-size: 10px; color: #5a5040; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; }
+.tab.active { color: #c8a030; border-bottom-color: #c8a030; }
+.panel { display: none; } .panel.active { display: block; }
+/* section */
+.sec { margin-bottom: 20px; }
+.sec-t { font-size: 12px; color: #c8a030; border-bottom: 1px solid #2a2418; padding-bottom: 4px; margin-bottom: 8px; letter-spacing: 1px; }
+.sec-sub { font-size: 11px; color: #a08858; border-bottom: 1px dashed #2a2418; padding-bottom: 3px; margin: 10px 0 6px; }
+/* note / formula */
+.note { background: #14120e; border: 1px solid #2a2418; border-radius: 3px; padding: 9px 11px; font-size: 10px; color: #8a8070; line-height: 1.9; margin-bottom: 8px; }
+.note b { color: #c8a030; } .note .g { color: #50c850; } .note .r { color: #c05050; }
+.note .b { color: #6090d0; } .note .p { color: #a060d0; } .note .y { color: #c8a030; }
+.formula { background: #0e0c08; border: 1px solid #1a1810; border-radius: 3px; padding: 8px 12px; font-size: 10px; color: #8a9870; line-height: 2.2; margin-bottom: 8px; }
+.formula .v { color: #a0c870; } .formula .n { color: #6090d0; }
+/* table */
+.tw { overflow-x: auto; margin-bottom: 8px; }
+table { border-collapse: collapse; font-size: 10px; min-width: 100%; }
+th { background: #1a1810; color: #c8a030; padding: 5px 8px; border: 1px solid #2a2418; text-align: center; white-space: nowrap; }
+td { padding: 4px 8px; border: 1px solid #1a1810; vertical-align: middle; }
+tr:nth-child(even) td { background: #141210; }
+tr:nth-child(odd) td { background: #100e0c; }
+td.L { text-align: left; }
+td.nm { color: #e8d8a8; white-space: nowrap; }
+td.sk { color: #c0b080; font-size: 9px; }
+td.gd { color: #50c850; } td.ok { color: #a8a050; } td.bd { color: #c05050; }
+td.nt { text-align: left; font-size: 9px; color: #7a7060; white-space: normal; line-height: 1.6; max-width: 180px; }
+/* tier row colors */
+.t0 { background: #140e08 !important; } .t1 { background: #0e0e08 !important; }
+.t2 { background: #0e0e18 !important; } .t3 { background: #0e1818 !important; }
+.t4 { background: #140e20 !important; } .t5 { background: #180e08 !important; }
+.t6 { background: #180818 !important; } .ts { background: #080e18 !important; }
+.cb { background: #100818 !important; } .bo { background: #100e08 !important; }
+.st { background: #040418 !important; }
+/* badge */
+.bx { display: inline-block; font-size: 9px; padding: 1px 5px; border-radius: 2px; border: 1.5px solid; margin: 1px; white-space: nowrap; }
+.bx-r { background: #180808; border-color: #802020; color: #c04040; }
+.bx-g { background: #081808; border-color: #207040; color: #40a060; }
+.bx-b { background: #080818; border-color: #204880; color: #4070c0; }
+.bx-p { background: #140818; border-color: #602090; color: #9040d0; }
+.bx-y { background: #181008; border-color: #806020; color: #c09030; }
+.bx-gray { background: #141210; border-color: #403828; color: #806850; }
+/* status badges (fixed/TBD) */
+.st-done { color: #50c850; font-size: 9px; } .st-tbd { color: #c05050; font-size: 9px; } .st-wip { color: #c8a030; font-size: 9px; }
+</style>
+</head>
+<body>
+
+<h1>⚒ 鍛冶屋RPG — 仕様書 完全版</h1>
+<div class="ver">2026-03-15 時点確定済み仕様のまとめ</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="T('overview',this)">概要</div>
+  <div class="tab" onclick="T('ui',this)">UI/画面</div>
+  <div class="tab" onclick="T('time',this)">時間</div>
+  <div class="tab" onclick="T('materials',this)">素材</div>
+  <div class="tab" onclick="T('weapons',this)">武器種</div>
+  <div class="tab" onclick="T('armor',this)">防具</div>
+  <div class="tab" onclick="T('forge',this)">鍛造</div>
+  <div class="tab" onclick="T('curse',this)">呪い・骨</div>
+  <div class="tab" onclick="T('town',this)">まち</div>
+  <div class="tab" onclick="T('adv',this)">冒険</div>
+  <div class="tab" onclick="T('upgrade',this)">強化</div>
+  <div class="tab" onclick="T('economy',this)">経済</div>
+  <div class="tab" onclick="T('orders',this)">依頼</div>
+  <div class="tab" onclick="T('name',this)">命名</div>
+  <div class="tab" onclick="T('todo',this)">未実装</div>
+</div>
+
+<!-- ====== 概要 ====== -->
+<div class="panel active" id="p-overview">
+  <div class="sec">
+    <div class="sec-t">ゲームコンセプト</div>
+    <div class="note">
+      <b>主人公は鍛冶屋。</b> 素材を集め・精錬し・武器/道具/防具を作り・売る経営×育成RPG。<br>
+      舞台：「はじまりのまち」　暦：<b>皇龍暦 648年 4月14日スタート</b><br><br>
+      <b>ゲームの軸：</b><br>
+      ① 素材の入手（採掘・探索・傭兵派遣・店購入）<br>
+      ② 鍛造（ミニゲーム）で品質を決める<br>
+      ③ 焼き入れ（冷却ミニゲーム）でキャップ変動<br>
+      ④ 依頼納品・店売りで収益を得る<br>
+      ⑤ 主人公・工房を強化してより良い武器を作れるようになる<br>
+      ⑥ ストーリーが進むとエリア・素材・依頼が解放されていく
+    </div>
+  </div>
+  <div class="sec">
+    <div class="sec-t">UIスタイル（参考：カタストロフィーレストラン）</div>
+    <div class="note">
+      <b>紙・クリップボード風パネル</b>（金の鋲、罫線）<br>
+      フォント：<b>DotGothic16</b>（ピクセルフォント）<br>
+      ひらがな多め。メタ表記（ATK/HPなど）は使わず自然な言葉で。<br>
+      ボタン色分け：緑=確認 / 橙=アクション / 赤=もどる / 青=情報 / 紫=特殊<br>
+      背景：各画面に専用のピクセルアート画像（透過オーバーレイで読みやすく）<br><br>
+      <b>背景画像割り当て：</b><br>
+      🔨 かじば → 鍛冶屋内部（炉・砥石・武器棚）<br>
+      🏘 まち → 石畳の街並み（酒場・薬屋看板）<br>
+      🗺 ぼうけん → 城門（騎士・馬車）<br>
+      📖 きろく → 図書室（本棚・羊皮紙）
+    </div>
+  </div>
+  <div class="sec">
+    <div class="sec-t">ボトムナビ（確定）</div>
+    <div class="note">
+      🔨 かじば / 🏘 まち / 🗺 ぼうけん / 📖 きろく<br>
+      各画面の背景色・雰囲気が切り替わる
+    </div>
+  </div>
+  <div class="sec">
+    <div class="sec-t">グレードシステム（23段階）</div>
+    <div class="note">G → G+ → F → F+ → E → E+ → D → D+ → C → C+ → B → B+ → A → A+ → S → S+ → SS → SS+ → ★ → ★+ → ★★ → ★★+ → ★★★</div>
+  </div>
+</div>
+
+<!-- ====== UI/画面 ====== -->
+<div class="panel" id="p-ui">
+  <div class="sec">
+    <div class="sec-t">HUD（常時表示）</div>
+    <div class="note">
+      <b>🪙 所持金</b>（長押し → 在庫価値・収支内訳）<br>
+      <b>日付チップ</b>「14日目 🌅 朝」（長押し → 皇龍暦詳細・季節・満月情報）<br>
+      <b>名声チップ</b>「★★☆☆☆」（長押し → ランク・次のランクまでのPT・ボーナス）
+    </div>
+  </div>
+  <div class="sec">
+    <div class="sec-t">かじば画面</div>
+    <div class="note">
+      メインパネル → たんぞうする / ざいこをみる / そざいおきば / きょうか<br><br>
+      <b>たんぞうする</b> → モード選択<br>
+      &nbsp;&nbsp;「依頼」：カテゴリ→サブカテゴリ→品目→素材（刃+柄）→鍛造ミニゲーム→焼き入れ→結果<br>
+      &nbsp;&nbsp;「たんぞう」：カテゴリ→サブカテゴリ→品目+素材+本数→鍛造ミニゲーム→焼き入れ→結果<br><br>
+      <b>ざいこ</b>：4×N グリッド。長押しで詳細ポップアップ（名前・グレード・説明・所持数）<br>
+      <b>そざいおきば</b>：金属 / 非金属に分類して表示<br>
+      <b>きょうか</b>：サブタブで「主人公」「工房」切り替え
+    </div>
+  </div>
+  <div class="sec">
+    <div class="sec-t">まち画面</div>
+    <div class="note">
+      タブ：ギルド / みせ / NPC / イベント<br>
+      ギルド：依頼受注・傭兵雇用・情報収集<br>
+      みせ：素材屋・加工屋/精錬所・まほうや（初期はしまってる）・よろずや<br>
+      NPC：カルス（傭兵/依頼）・グランじいさん（師匠/ヒント）・リリア（魔術師/素材商）・未解放NPC<br>
+      イベント：ランダムイベント・予告通知
+    </div>
+  </div>
+  <div class="sec">
+    <div class="sec-t">ぼうけん画面</div>
+    <div class="note">
+      タブ：エリア / はけん / さいくつ<br>
+      エリア選択 → 詳細画面（自分で探索 / 傭兵にたのむ）<br>
+      エリア：ひがしの森・ちかこうざん・まいごのダンジョン・???の海域（ロック）<br>
+      はけん：傭兵の派遣状況・進捗ゲージ<br>
+      さいくつ：鉄鉱脈・銅鉱脈・ミスリル鉱脈（ロック）
+    </div>
+  </div>
+  <div class="sec">
+    <div class="sec-t">きろく画面</div>
+    <div class="note">
+      タブ：とうけい / もちもの / エンディング / せってい<br>
+      とうけい：製作本数・所持金・日数・探索回数<br>
+      もちもの：武器・アイテムグリッド + 特殊アイテム<br>
+      エンディング：3/12解放済み、残りは???<br>
+      せってい：BGM/SE/バイブ/テキストスピード/バージョン/セーブ/タイトルへ
+    </div>
+  </div>
+  <div class="sec">
+    <div class="sec-t">タイトル画面</div>
+    <div class="note">
+      「皇龍暦 648年」「⚒ 鍛冶屋RPG」ロゴ + 「はじめる」ボタン<br>
+      暗い背景・ゴールドカラー
+    </div>
+  </div>
+  <div class="sec">
+    <div class="sec-t">1日終了リザルト</div>
+    <div class="note">
+      夜→朝をまたぐと自動表示。オーバーレイ。<br>
+      当日の製作数・探索回数・所持金・名声を表示。<br>
+      「N日目のあさへ」ボタンで閉じる。
+    </div>
+  </div>
+  <div class="sec">
+    <div class="sec-t">長押し詳細（全インベントリセル共通）</div>
+    <div class="note">
+      0.4秒長押し（or PCはマウス長押し）でポップアップ表示。<br>
+      離すと瞬時に消える。<br>
+      表示内容：名前・グレード・カテゴリ・説明・所持数
+    </div>
+  </div>
+</div>
+
+<!-- ====== 時間 ====== -->
+<div class="panel" id="p-time">
+  <div class="sec">
+    <div class="sec-t">時間システム（現在：4フェーズ制）</div>
+    <div class="note">
+      1日 = 4フェーズ（朝・昼・夕・夜）<br>
+      <b>後で24時間制に移行予定</b>（主人公の「手際」スキルが本格的に機能するタイミング）<br>
+      HUD表示：「14日目 🌅 朝」通常はこれだけ。長押しで詳細。
+    </div>
+    <div class="tw"><table>
+      <tr><th>アクション</th><th>フェーズ消費</th><th>備考</th></tr>
+      <tr><td>依頼たんぞう（1本）</td><td class="ok">1フェーズ</td><td class="nt">ミニゲーム+焼き入れあり</td></tr>
+      <tr><td>量産たんぞう（3本まで）</td><td class="ok">1フェーズ</td><td class="nt">4本目以降は+1フェーズ/3本</td></tr>
+      <tr><td>採掘</td><td class="ok">1フェーズ</td><td></td></tr>
+      <tr><td>探索（自分）</td><td class="ok">2フェーズ</td><td class="nt">ランダムドロップ</td></tr>
+      <tr><td>傭兵派遣</td><td class="gd">0フェーズ</td><td class="nt">日数経過で結果が届く</td></tr>
+      <tr><td>相談（NPC）</td><td class="ok">1フェーズ</td><td class="nt">依頼ボーダー詳細が開示</td></tr>
+      <tr><td>情報収集（まち）</td><td class="ok">1フェーズ</td><td class="nt">郵便依頼のヒントなど</td></tr>
+      <tr><td>加工屋に預ける</td><td class="ok">1フェーズ後に受け取り</td><td class="nt">50個/フェーズ</td></tr>
+      <tr><td>睡眠</td><td>残りフェーズを消化</td><td class="nt">翌朝へ・1日リザルト表示</td></tr>
+    </table></div>
+  </div>
+  <div class="sec">
+    <div class="sec-t">暦・季節</div>
+    <div class="note">
+      <b>皇龍暦</b> 648年スタート。1月=30日。<br>
+      季節：冬(1-3月)採集-10% / 春(4-6月)採集+10% / 夏(7-9月)レア素材+5% / 秋(10-12月)農具+15%<br>
+      満月：15日ごと。満月の夜は希少素材出現率UP
+    </div>
+  </div>
+</div>
+
+<!-- ====== 素材 ====== -->
+<div class="panel" id="p-materials">
+  <div class="sec">
+    <div class="sec-t">全素材一覧（22種 + サプライズ枠）</div>
+    <div class="note"><b>魔法炉ロック中</b>：ミスリル・アダマンタイト・オリハルコン・ヒヒイロカネ・竜骨・魔石・魔液の7種は加工不可。</div>
+    <div class="tw"><table>
+      <tr><th>ティア</th><th>素材名</th><th>種別</th><th>総合Cap</th><th>得意ステ (+1段階)</th><th>特徴</th><th>入手</th></tr>
+      <!-- 非金属 -->
+      <tr class="t0"><td><span class="bx bx-gray">非金属T0</span></td><td class="nm">木材</td><td>非金属</td><td class="ok">F</td><td class="sk">SPD→F+</td><td class="nt">軽い。柄・農具専用。刃不可。</td><td class="nt">序盤</td></tr>
+      <tr class="t0"><td></td><td class="nm">骨</td><td>非金属</td><td class="ok">D</td><td class="sk">CRIT→D+</td><td class="nt">軽い。もろい。骨シリーズの補助素材にも。</td><td class="nt">探索・ドロップ</td></tr>
+      <tr class="t0"><td></td><td class="nm">石</td><td>非金属</td><td class="ok">D</td><td class="sk">HP→D+</td><td class="nt">安価。重い。農具頭部向き。</td><td class="nt">採掘</td></tr>
+      <tr class="t0"><td></td><td class="nm">黒曜石</td><td>非金属</td><td class="ok">B</td><td class="sk">ATK→B+</td><td class="nt">鋭さ最高クラス。極めてもろい。HP極低。</td><td class="nt">ダンジョン採掘</td></tr>
+      <tr class="t0"><td></td><td class="nm">クリスタル</td><td>非金属</td><td class="ok">A</td><td class="sk">MAG→A+</td><td class="nt">魔力親和最高。杖の必須素材。物理低。</td><td class="nt">深層・店高価</td></tr>
+      <!-- 金属T1 -->
+      <tr class="t1"><td><span class="bx bx-gray">金属T1</span></td><td class="nm">銅</td><td>金属</td><td class="ok">D</td><td class="sk">SPD→D+</td><td class="nt">安価。加工しやすい。錆びやすい。</td><td class="nt">序盤</td></tr>
+      <tr class="t1"><td></td><td class="nm">青銅</td><td>金属</td><td class="ok">D+</td><td class="sk">HP→D+</td><td class="nt">銅より丈夫。古代・郷土系の雰囲気。銅+錫で精錬。</td><td class="nt">精錬所</td></tr>
+      <tr class="t1"><td></td><td class="nm">ブリキ</td><td>金属</td><td class="ok">D</td><td class="sk">RUST→D+</td><td class="nt">錆びにくい。非常に柔らかい。道具・農具向き。武器には不向き。</td><td class="nt">店</td></tr>
+      <!-- 金属T2 -->
+      <tr class="t2"><td><span class="bx bx-b">金属T2</span></td><td class="nm">鉄</td><td>金属</td><td class="ok">B</td><td class="sk">HP→B+</td><td class="nt">バランス型。序盤〜中盤の主力。</td><td class="nt">採掘・店</td></tr>
+      <tr class="t2"><td></td><td class="nm">金</td><td>金属(特殊)</td><td class="ok">B</td><td class="sk">MAG→B+</td><td class="nt">魔力高。ATK低。貴族・魔術師向け。</td><td class="nt">店高価・探索</td></tr>
+      <!-- 金属T3 -->
+      <tr class="t3"><td><span class="bx bx-b">金属T3</span></td><td class="nm">コバルト</td><td>金属</td><td class="ok">A</td><td class="sk">ATK→A+</td><td class="nt">硬い。重い。ATK特化。</td><td class="nt">鉱山中層</td></tr>
+      <tr class="t3"><td></td><td class="nm">パラジウム</td><td>金属</td><td class="ok">A</td><td class="sk">HP→A+</td><td class="nt">錆びない。耐久特化。長持ち。</td><td class="nt">鉱山中層</td></tr>
+      <tr class="t3"><td></td><td class="nm">チタン</td><td>金属</td><td class="ok">A</td><td class="sk">SPD→A+</td><td class="nt">軽くて強い。SPD特化。</td><td class="nt">鉱山中層〜深層</td></tr>
+      <!-- 上級金属T4-6 -->
+      <tr class="t4"><td><span class="bx bx-p">上級T4</span></td><td class="nm">ミスリル</td><td>上級金属</td><td class="ok">S</td><td class="sk">MAG→S+</td><td class="nt">軽い。魔力高い。万能。</td><td class="nt">ダンジョン深層・ギルド</td></tr>
+      <tr class="t4"><td></td><td class="nm">アダマンタイト</td><td>上級金属</td><td class="ok">S</td><td class="sk">ATK→S+</td><td class="nt">最硬。非常に重い。</td><td class="nt">最深層</td></tr>
+      <tr class="t4"><td><span class="bx bx-p">上級T5</span></td><td class="nm">オリハルコン</td><td>上級金属</td><td class="ok">SS</td><td class="sk">HP→SS+</td><td class="nt">守りの金属。HP・耐久の頂点。</td><td class="nt">伝説依頼・特定ダンジョン</td></tr>
+      <tr class="t4"><td><span class="bx bx-p">上級T6</span></td><td class="nm">ヒヒイロカネ</td><td>上級金属</td><td class="ok">★★</td><td class="sk">全項目→★★+</td><td class="nt">全能。和風最終素材。</td><td class="nt">伝説クエスト達成のみ</td></tr>
+      <!-- 上級素材 -->
+      <tr class="ts"><td><span class="bx bx-g">上級素材</span></td><td class="nm">竜骨</td><td>上級素材</td><td class="ok">SS</td><td class="sk">HP→SS+</td><td class="nt">耐久最高。非常に重い。農具特効。</td><td class="nt">竜系ボス</td></tr>
+      <tr class="ts"><td></td><td class="nm">魔石</td><td>上級素材</td><td class="ok">S</td><td class="sk">MAG→S+</td><td class="nt">魔力の塊。物理低。杖の必須素材。</td><td class="nt">ダンジョン深層</td></tr>
+      <tr class="ts"><td></td><td class="nm">魔液</td><td>上級素材</td><td class="ok">S</td><td class="sk">全項目均等</td><td class="nt">全ステータス均等に高い。穴がない。</td><td class="nt">特殊敵ドロップ</td></tr>
+      <tr class="ts"><td></td><td class="nm">神木</td><td>上級素材</td><td class="ok">A</td><td class="sk">SPD→A+</td><td class="nt">自然の加護。農具・杖系に効果発動。柄専用推奨。</td><td class="nt">古森・特定クエスト</td></tr>
+      <tr class="cb"><td><span class="bx bx-p">呪い</span></td><td class="nm">呪い素材</td><td>上級素材</td><td class="ok">A</td><td class="sk">CRIT→A+ ※呪い発動</td><td class="nt">各ステータスの一定%がランダムに移動。完成まで内容不明。鑑定不可。</td><td class="nt">ダンジョン深層</td></tr>
+      <tr class="st"><td><span class="bx bx-b">ストーリー</span></td><td class="nm">命を宿した金属</td><td>—</td><td class="ok">未定</td><td class="sk">未定</td><td class="nt">意思を持つ金属。ストーリーと連動。詳細後で設計。</td><td class="nt">ストーリー進行のみ</td></tr>
+    </table></div>
+  </div>
+  <div class="sec">
+    <div class="sec-t">柄素材の効果</div>
+    <div class="tw"><table>
+      <tr><th>柄素材</th><th>効果</th></tr>
+      <tr><td class="nm">木材</td><td class="nt">標準。変化なし。</td></tr>
+      <tr><td class="nm">革</td><td class="nt">取り回し↑。軽武器・軽道具の品質+。</td></tr>
+      <tr><td class="nm">骨</td><td class="nt">軽量化（SPD+）。</td></tr>
+      <tr><td class="nm">神木</td><td class="nt">農具・杖系カテゴリに加護発動（MAG倍率+0.5）。</td></tr>
+    </table></div>
+  </div>
+  <div class="sec">
+    <div class="sec-t">ステータス一覧</div>
+    <div class="tw"><table>
+      <tr><th>略称</th><th>正式名（武器）</th><th>道具での名称</th><th>重武器重み</th><th>軽武器重み</th><th>道具重み</th></tr>
+      <tr><td class="sk">ATK</td><td>こうげきりょく</td><td>こうりつせい</td><td class="ok">×1.5</td><td class="gd">×2</td><td class="ok">×1.5</td></tr>
+      <tr><td class="sk">IMP</td><td>しょうげきりょく</td><td>うちつけのちから</td><td class="gd">×2.5</td><td class="bd">×0.5</td><td class="ok">×1</td></tr>
+      <tr><td class="sk">HP</td><td>たいきゅうち</td><td>たいきゅうせい</td><td class="ok">×1.5</td><td class="bd">×0.5</td><td class="gd">×2</td></tr>
+      <tr><td class="sk">CRIT</td><td>かいしんりつ</td><td>かいしんこうりつ</td><td class="bd">×0.5</td><td class="gd">×2</td><td class="ok">×0.5</td></tr>
+      <tr><td class="sk">SPD</td><td>はやさほせい</td><td>とりまわし</td><td class="bd">×0（無効）</td><td class="gd">×2</td><td class="ok">×1</td></tr>
+      <tr><td class="sk">MAG</td><td>まほうしんわ</td><td>—</td><td class="bd">×0</td><td class="bd">×0.5</td><td class="bd">×0</td></tr>
+      <tr><td class="sk">WGT</td><td>おもさ</td><td>—</td><td class="gd">プラス評価</td><td class="bd">マイナス評価</td><td class="ok">中立</td></tr>
+    </table></div>
+  </div>
+</div>
+
+<!-- ====== 武器種 ====== -->
+<div class="panel" id="p-weapons">
+  <div class="sec">
+    <div class="sec-t">武器種決定ロジック</div>
+    <div class="note">
+      プレイヤーが選ぶ：<b>カテゴリ</b>（軽/普通/重/特殊）＋ <b>柄の長さ</b>（短/長）<br>
+      自動決定：メイン素材の個数（1〜5）で武器種が変わる<br>
+      追加変化：特殊素材（魔石/クリスタル/呪い/骨）で別の武器種に派生
+    </div>
+    <div class="sec-sub">軽武器</div>
+    <div class="tw"><table>
+      <tr><th>素材数</th><th>柄：短</th><th>柄：長</th><th>魔石/クリスタル派生</th><th>呪い派生</th><th>重視ステ</th></tr>
+      <tr><td>×1</td><td class="nm">小刀</td><td class="nm">ダガー</td><td class="nm">魔力刃</td><td class="nm">不穏な小刀</td><td class="sk">CRIT×2 SPD×1.5</td></tr>
+      <tr><td>×2</td><td class="nm">ショートダガー</td><td class="nm">ショートソード</td><td class="nm">毒刃</td><td class="nm">呪われた刃</td><td class="sk">CRIT×2 SPD×1.5</td></tr>
+      <tr><td>×3</td><td class="nm">サイドソード</td><td class="nm">レイピア</td><td class="nm">魔力剣</td><td class="nm">狂った剣</td><td class="sk">CRIT×1.5 ATK×1.5</td></tr>
+      <tr><td>×4</td><td class="nm">ショートソード</td><td class="nm">サーベル</td><td class="nm">エンチャントソード</td><td class="nm">邪悪な剣</td><td class="sk">ATK×1.5 SPD×1.5</td></tr>
+      <tr><td>×5</td><td class="nm">ロングダガー</td><td class="nm">ロングソード</td><td class="nm">魔剣</td><td class="nm">混沌の刃</td><td class="sk">ATK×2 SPD×1</td></tr>
+    </table></div>
+    <div class="sec-sub">普通武器</div>
+    <div class="tw"><table>
+      <tr><th>素材数</th><th>柄：短</th><th>柄：長</th><th>特殊派生</th><th>重視ステ</th></tr>
+      <tr><td>×1</td><td class="nm">クラブ</td><td class="nm">ウォーピック</td><td class="nm">魔力棍</td><td class="sk">IMP×2</td></tr>
+      <tr><td>×2</td><td class="nm">ブロードソード</td><td class="nm">ハンドアックス</td><td class="nm">ルーンソード</td><td class="sk">ATK×1.5 IMP×1</td></tr>
+      <tr><td>×3</td><td class="nm">ロングソード</td><td class="nm">ポールソード</td><td class="nm">魔力長剣</td><td class="sk">ATK×2</td></tr>
+      <tr><td>×4</td><td class="nm">バスタードソード</td><td class="nm">グレートソード</td><td class="nm">聖剣/邪剣</td><td class="sk">ATK×2.5</td></tr>
+      <tr><td>×5</td><td class="nm">クレイモア</td><td class="nm">ツーハンドソード</td><td class="nm">伝説の剣</td><td class="sk">ATK×2 HP×1</td></tr>
+    </table></div>
+    <div class="sec-sub">重武器</div>
+    <div class="tw"><table>
+      <tr><th>素材数</th><th>柄：短</th><th>柄：長</th><th>特殊派生</th><th>重視ステ</th></tr>
+      <tr><td>×1</td><td class="nm">ハチェット</td><td class="nm">ウォーピック</td><td class="nm">魔力斧</td><td class="sk">IMP×2 WGT×1</td></tr>
+      <tr><td>×2</td><td class="nm">ハンドアックス</td><td class="nm">バトルアックス</td><td class="nm">フレイム斧</td><td class="sk">IMP×2 WGT×1.5</td></tr>
+      <tr><td>×3</td><td class="nm">ウォーアックス</td><td class="nm">ハルバード</td><td class="nm">雷撃斧</td><td class="sk">IMP×2.5 WGT×1</td></tr>
+      <tr><td>×4</td><td class="nm">ウォーハンマー</td><td class="nm">グレートアックス</td><td class="nm">魔力ハンマー</td><td class="sk">IMP×2 WGT×2 HP×0.5</td></tr>
+      <tr><td>×5</td><td class="nm">グレートハンマー</td><td class="nm">ポールアックス</td><td class="nm">破壊神の鎚</td><td class="sk">IMP×2.5 WGT×2</td></tr>
+    </table></div>
+    <div class="sec-sub">特殊（杖）— クリスタルor魔石が必須</div>
+    <div class="tw"><table>
+      <tr><th>素材数</th><th>柄：短</th><th>柄：長</th><th>必須素材</th><th>重視ステ</th></tr>
+      <tr><td>×1〜2</td><td class="nm">ワンド</td><td class="nm">ロッド</td><td>クリスタル×1 or 魔石×1</td><td class="sk">MAG×3</td></tr>
+      <tr><td>×3</td><td class="nm">スタッフ</td><td class="nm">ロングスタッフ</td><td>クリスタル×2 or 魔石×2</td><td class="sk">MAG×3</td></tr>
+      <tr><td>×4</td><td class="nm">ロングスタッフ</td><td class="nm">両手杖</td><td>クリスタル×3 or 魔石×3</td><td class="sk">MAG×3 HP×0.5</td></tr>
+      <tr><td>×5+長柄</td><td class="nm">—</td><td class="nm">両手大杖</td><td>クリスタル×4</td><td class="sk">MAG×4</td></tr>
+    </table></div>
+    <div class="sec-sub">道具</div>
+    <div class="tw"><table>
+      <tr><th>カテゴリ</th><th>素材数</th><th>柄：短</th><th>柄：長</th><th>重視ステ</th></tr>
+      <tr><td rowspan="3">軽道具</td><td>×1〜2</td><td class="nm">ペティナイフ</td><td class="nm">ナイフ</td><td class="sk">ATK×1.5 SPD×1</td></tr>
+      <tr><td>×3</td><td class="nm">ハサミ</td><td class="nm">ガーデンシアー</td><td class="sk">ATK×1 FLEX×1.5</td></tr>
+      <tr><td>×4〜5</td><td class="nm">クリーバー</td><td class="nm">ロングナイフ</td><td class="sk">ATK×2</td></tr>
+      <tr><td rowspan="3">重道具</td><td>×1〜2</td><td class="nm">小クワ</td><td class="nm">クワ</td><td class="sk">HP×2 IMP×1</td></tr>
+      <tr><td>×3〜4</td><td class="nm">スコップ</td><td class="nm">シャベル</td><td class="sk">HP×2 IMP×1.5</td></tr>
+      <tr><td>×5</td><td class="nm">マサカリ</td><td class="nm">大マサカリ</td><td class="sk">IMP×2 HP×1</td></tr>
+      <tr><td rowspan="2">郷具</td><td>×1〜2</td><td class="nm">のみ</td><td class="nm">きり</td><td class="sk">ATK×1 FLEX×2</td></tr>
+      <tr><td>×3〜5</td><td class="nm">彫刻刀</td><td class="nm">大のみ</td><td class="sk">ATK×1.5 FLEX×2</td></tr>
+    </table></div>
+  </div>
+</div>
+
+<!-- ====== 防具 ====== -->
+<div class="panel" id="p-armor">
+  <div class="sec">
+    <div class="sec-t">防具 — 素材数で段階が変わる・重さトレードオフ</div>
+    <div class="tw"><table>
+      <tr><th>段階</th><th>回避</th><th>防御</th><th>速度</th></tr>
+      <tr><td>×1</td><td class="gd">高</td><td class="bd">低</td><td class="gd">速い</td></tr>
+      <tr><td>×2</td><td class="ok">やや高</td><td class="bd">やや低</td><td class="ok">速め</td></tr>
+      <tr><td>×3</td><td class="ok">普通</td><td class="ok">普通</td><td class="ok">普通</td></tr>
+      <tr><td>×4</td><td class="bd">低</td><td class="gd">高</td><td class="bd">遅め</td></tr>
+      <tr><td>×5</td><td class="bd">最低</td><td class="gd">最高</td><td class="bd">遅い</td></tr>
+    </table></div>
+    <div class="tw"><table>
+      <tr><th>部位</th><th>×1</th><th>×2</th><th>×3</th><th>×4</th><th>×5</th></tr>
+      <tr><td>頭</td><td class="nm">帽子(キャップ/フード)</td><td class="nm">軽兜(ライトヘルム)</td><td class="nm">兜(ヘルム)</td><td class="nm">重兜(ヘビーヘルム)</td><td class="nm">全頭兜(フルヘルム)</td></tr>
+      <tr><td>体</td><td class="nm">ローブ/チュニック</td><td class="nm">アーマー</td><td class="nm">チェインメイル</td><td class="nm">プレートアーマー</td><td class="nm">フルプレート</td></tr>
+      <tr><td>盾</td><td class="nm">木盾</td><td class="nm">小盾</td><td class="nm">ラウンドシールド</td><td class="nm">大盾</td><td class="nm">タワーシールド</td></tr>
+      <tr><td>アクセ</td><td class="nm">チャーム</td><td class="nm">指輪</td><td class="nm">耳飾り</td><td class="nm">首飾り</td><td class="nm">〜の加護</td></tr>
+    </table></div>
+    <div class="note">
+      <b>アクセサリー特殊効果：</b><br>
+      魔石→攻撃魔法補助 / クリスタル→防御魔法補助 / 呪い素材→デバフ付与 / 神木→農業・採集↑<br>
+      ×5「〜の加護」は素材によって変わる（例：鉄×5=鋼鉄の加護、神木×5=大地の加護）
+    </div>
+  </div>
+</div>
+
+<!-- ====== 鍛造 ====== -->
+<div class="panel" id="p-forge">
+  <div class="sec">
+    <div class="sec-t">鍛造ミニゲーム — 実装済みシステム（blacksmith_full.html より）</div>
+    <div class="formula">
+      叩き回数 = <span class="v">鍛冶場Lv</span> × 2 ＋ <span class="v">名声ランク</span> × 1 ＋ <span class="v">ハンマースキルLv</span> × 1<br>
+      例：Lv3・★★・ハンマーLv1 → 3×2 ＋ 2 ＋ 1 = <b style="color:#e8d8a8;">9回</b>
+    </div>
+    <div class="note">
+      <b>グリッド構造：</b> 3×4マス（12マス固定）。品目ごとに部位配置パターンが異なる。<br>
+      マスをタップ → 対応部位のステータスが上昇 → フィードログに結果表示 → 残り回数0で自動完了<br><br>
+      <b>フィードログ：</b> 通常「〇〇をたたいた。 ××↑ +N」/ 最大値付近で「【すばらしい】〇〇をうちぬいた！」<br>
+      <b>ヒットアニメ：</b> セルがバウンス + 上昇数値がフロートして消える
+    </div>
+    <div class="tw"><table>
+      <tr><th>コード</th><th>部位名</th><th>上昇ステータス</th><th>上昇幅/1回</th><th>セル色</th></tr>
+      <tr><td class="nm">E</td><td>えっじ（刃部）</td><td class="sk">ATK</td><td>+3〜7</td><td style="color:#4a8af0;">■ 青</td></tr>
+      <tr><td class="nm">H</td><td>ほんたい（胴部）通常</td><td class="sk">HP</td><td>+4〜9</td><td style="color:#50b850;">■ 緑</td></tr>
+      <tr><td class="nm">B</td><td>ほんたい（胴部）大</td><td class="sk">HP</td><td>+5〜11</td><td style="color:#50b850;">■ 緑</td></tr>
+      <tr><td class="nm">T</td><td>つか（柄部）</td><td class="sk">SPD</td><td>+2〜5</td><td style="color:#c87820;">■ 橙</td></tr>
+      <tr><td class="nm">M</td><td>みね（背面）</td><td class="sk">CRIT</td><td>+1〜3</td><td style="color:#c84040;">■ 赤</td></tr>
+    </table></div>
+    <div class="note">
+      <b>品目ごとのグリッドパターン例（12マスの配置）：</b><br>
+      たんけん：EE EE EB EB EM EE EH BH HT TT BT<br>
+      けん：EE EE EH HH EM MH EH EH HB TT BT<br>
+      ウォーハンマー：HH HH HH HH MM HH HH HH HB TB BB<br>
+      くわ：BH HH HB EH HE BB BH HH HB BB HH<br>
+      （左→右・上→下の順。重武器ほどH/Bが多く、軽武器ほどE/Tが多い）
+    </div>
+    <div class="sec-sub">ステータス計算式（素材選択時プレビューと同一）</div>
+    <div class="formula">
+      ATK = 品目baseATK ＋ 素材するどさ × 0.4<br>
+      HP  = 素材耐久 × 品目hpMult × (1 ＋ 素材柔軟性/200) × 錆び補正(rust&gt;60で×1.05)<br>
+      CRIT= 品目baseCRIT ＋ (素材するどさ×0.4) × 0.3<br>
+      SPD = (柄扱いやすさ − 素材魔力×0.08) × 0.3 ＋ 品目baseSPD ＋ 素材SPD×0.1<br><br>
+      鍛造ミニゲームでこれらの値に各部位の上昇分が加算される。<br>
+      最終値はキャップ（素材総合Cap ＋ 得意ステ+1段階）で頭打ちになる。
+    </div>
+    <div class="sec-sub">完了・納品画面</div>
+    <div class="note">
+      <b>表示順：</b><br>
+      ① 依頼者の一言（最上部）<br>
+      ② 武器名 ＋ 総合評価グレード<br>
+      ③ 各ステータス個別評価（2×2グリッド）<br>
+      ④ ボーダーチェック（クリア/未達成）<br>
+      ⑤ フレーバーテキスト ＋ 報酬ゴールド<br>
+      ⑥ おきにいりとうろく / つぎへ ボタン<br><br>
+      <b>依頼者の一言（グレード別）：</b><br>
+      G：「...。」/ C：「...まあ、使うよ。」/ B：「標準的だな。」/ A：「使いやすそうだ。」<br>
+      S：「じゅうぶんだ。」/ SS：「かなりいい出来だ。」/ ★：「申し分ない。」<br>
+      ★★：「すごい。ここまでとは。」/ ★★★：「...これは。伝説だ。」
+    </div>
+  </div>
+  <div class="sec">
+    <div class="sec-t">焼き入れミニゲーム（鍛造後の最終工程）</div>
+    <div class="note">
+      冷却素材を選ぶ → 樽を長押しで冷やす（押している間だけ蒸気/炎/葉エフェクト）<br>
+      ゲージが満タン → マップアニメ → 白明転 → 完成画面
+    </div>
+    <div class="tw"><table>
+      <tr><th>素材</th><th>入手</th><th>エフェクト</th><th>HPキャップ変化</th><th>備考</th></tr>
+      <tr><td class="nm">水</td><td class="gd">無限（工房常備）</td><td>白い蒸気モワモワ</td><td class="ok">変化なし</td><td class="nt">コストゼロ。デフォルト。</td></tr>
+      <tr><td class="nm">油</td><td class="ok">加工屋副産物・店購入（50G前後）</td><td>ほんのり黄色 + 赤い炎</td><td class="gd">+1段階</td><td class="nt">精錬時に少量副産物として出る。</td></tr>
+      <tr><td class="nm">バナナの葉</td><td class="bd">店にまれに入荷・冒険でたまに入手（レア）</td><td>緑の塊 + 白い蒸気</td><td class="gd">+2段階（強制）</td><td class="nt">レア。使うたびに悩む。</td></tr>
+    </table></div>
+  </div>
+  <div class="sec">
+    <div class="sec-t">武器名・説明の自動生成</div>
+    <div class="formula">
+      武器名 = 「メイン素材名」＋「の」＋「武器種名」<br>
+      例：鉄 × ロングソード → <b style="color:#e8d8a8;">鉄のロングソード</b><br><br>
+      説明文 = ①素材説明（固定）＋ ②武器種説明（固定）＋ ③素材特徴（自動）＋ ④仕上げ文（S以上のみ）
+    </div>
+  </div>
+  <div class="sec">
+    <div class="sec-t">固有名命名システム</div>
+    <div class="note">
+      通常は武器に固有名なし。<b>お気に入り登録したときに初めて名前をつけられる。</b><br>
+      名前をつけた武器だけが「武器の生涯ログ」に記録される。<br>
+      呪い武器のお気に入り登録時 → 呪い内容が初めて開示される。
+    </div>
+  </div>
+</div>
+
+<!-- ====== 呪い・骨 ====== -->
+<div class="panel" id="p-curse">
+  <div class="sec">
+    <div class="sec-t">呪いシステム — 使用量で狂いの大きさが変わる</div>
+    <div class="tw"><table>
+      <tr><th>使用量</th><th>狂い率</th><th>名前接頭辞</th><th>特記</th></tr>
+      <tr class="cb"><td>×1</td><td class="ok">15%移動</td><td class="nm" style="color:#a060c0;">不穏な〜</td><td class="nt">微妙にズレる程度。試しやすい。</td></tr>
+      <tr class="cb"><td>×2</td><td class="ok">30%移動</td><td class="nm" style="color:#8040b0;">呪われた〜</td><td class="nt">明確に変わる。当たり外れが出始める。</td></tr>
+      <tr class="cb"><td>×3</td><td class="bd">45%移動</td><td class="nm" style="color:#c03080;">狂った〜</td><td class="nt">大きく化ける可能性あり。外れると悲惨。</td></tr>
+      <tr class="cb"><td>×4</td><td class="bd">60%移動</td><td class="nm" style="color:#d02040;">邪悪な〜</td><td class="nt">原形をとどめない。上級者向け。</td></tr>
+      <tr class="cb"><td>×5</td><td class="bd">75%移動</td><td class="nm" style="color:#e04060;animation:glow 1.5s infinite alternate;">混沌の〜</td><td class="nt">完全ギャンブル。★以上確定。</td></tr>
+    </table></div>
+    <div class="note">
+      <b>移動ルール：</b>各ステータスのN%がランダムな別ステータスに移動（元は減る）。合計値は保存。<br>
+      完成まで内容不明。鑑定不可。お気に入り登録時に初めて開示。<br>
+      <b>骨との相性◎：</b>骨はHP極低の代わりにCRIT上昇のみ。呪いと組み合わせると特殊イベントで活躍する可能性あり。
+    </div>
+  </div>
+  <div class="sec">
+    <div class="sec-t">骨シリーズ — メイン素材 ＋ 骨の組み合わせ</div>
+    <div class="note">骨の効果：軽量化（重量−30%）＋CRIT+ボーナス。HP補正が下がる（もろくなる）。</div>
+    <div class="tw"><table>
+      <tr><th>組み合わせ</th><th>カテゴリ</th><th>柄：短</th><th>柄：長</th></tr>
+      <tr class="bo"><td>骨＋鉄</td><td>軽武器</td><td class="nm">骨装剣</td><td class="nm">骨装ロングダガー</td></tr>
+      <tr class="bo"><td>骨＋鉄</td><td>普通武器</td><td class="nm">ボーンブレード</td><td class="nm">ボーンスピア</td></tr>
+      <tr class="bo"><td>骨＋コバルト</td><td>重武器</td><td class="nm">骨鋲ハンマー</td><td class="nm">骨鋲ポールアックス</td></tr>
+      <tr class="bo"><td>骨＋呪い素材</td><td>どれでも</td><td class="nm">呪骨剣</td><td class="nm">呪骨槍</td></tr>
+      <tr class="bo"><td>骨＋魔石</td><td>特殊</td><td class="nm">骨ワンド</td><td class="nm">骨スタッフ</td></tr>
+      <tr class="bo"><td>骨＋ミスリル</td><td>軽武器</td><td class="nm">霊銀骨剣</td><td class="nm">霊銀骨レイピア</td></tr>
+    </table></div>
+  </div>
+</div>
+
+<!-- ====== まち ====== -->
+<div class="panel" id="p-town">
+  <div class="sec">
+    <div class="sec-t">まち画面</div>
+    <div class="tw"><table>
+      <tr><th>施設/NPC</th><th>できること</th><th>備考</th></tr>
+      <tr><td class="nm">ギルド酒場</td><td class="nt">依頼受注・傭兵雇用・情報収集（1フェーズ）</td><td class="nt">相談で依頼ボーダー詳細が開示</td></tr>
+      <tr><td class="nm">素材屋</td><td class="nt">素材購入</td><td class="nt">基本素材は常時在庫</td></tr>
+      <tr><td class="nm">加工屋/精錬所</td><td class="nt">鉱石→金属の精錬（1フェーズ/50個）</td><td class="nt">100G配達オプションあり（翌朝届く）。油が副産物として少量出る。魔法炉未解放時は上級7種を扱えない。</td></tr>
+      <tr><td class="nm">まほうや</td><td class="nt">魔石・付与材料</td><td class="nt">初期はしまってる</td></tr>
+      <tr><td class="nm">よろずや</td><td class="nt">日用品・バナナの葉など</td><td class="nt">バナナの葉はまれに入荷</td></tr>
+      <tr><td class="nm">カルス</td><td class="nt">傭兵/常連客。直接依頼もある。</td><td class="nt">相談0フェーズ</td></tr>
+      <tr><td class="nm">グランじいさん</td><td class="nt">師匠/ヒント</td><td></td></tr>
+      <tr><td class="nm">リリア</td><td class="nt">魔術師/素材商。希少素材の取引。</td><td></td></tr>
+      <tr><td class="nm">郵便受け（鍛冶場）</td><td class="nt">貴族・王族・遠方商会の依頼</td><td class="nt">相談不可。情報収集でヒント。</td></tr>
+    </table></div>
+  </div>
+</div>
+
+<!-- ====== 冒険 ====== -->
+<div class="panel" id="p-adv">
+  <div class="sec">
+    <div class="sec-t">エリア一覧</div>
+    <div class="tw"><table>
+      <tr><th>エリア</th><th>入手素材</th><th>解放状態</th></tr>
+      <tr><td class="nm">ひがしの森</td><td>木材・骨・薬草</td><td class="gd">解放済み</td></tr>
+      <tr><td class="nm">ちかこうざん</td><td>鉄・銅・石</td><td class="gd">解放済み</td></tr>
+      <tr><td class="nm">まいごのダンジョン</td><td>黒曜石・骨・まれに魔石</td><td class="gd">解放済み</td></tr>
+      <tr><td class="nm">???の海域</td><td>未定</td><td class="bd">ストーリー解放</td></tr>
+    </table></div>
+    <div class="tw"><table>
+      <tr><th>アクション</th><th>フェーズ</th><th>効果</th></tr>
+      <tr><td>自分で探索</td><td class="ok">2フェーズ</td><td class="nt">ランダムドロップ</td></tr>
+      <tr><td>傭兵にたのむ</td><td class="ok">1フェーズ（指示のみ）</td><td class="nt">日数経過後に結果</td></tr>
+      <tr><td>採掘</td><td class="ok">1フェーズ</td><td class="nt">固定ドロップ</td></tr>
+    </table></div>
+  </div>
+</div>
+
+<!-- ====== 強化 ====== -->
+<div class="panel" id="p-upgrade">
+  <div class="sec">
+    <div class="sec-t">主人公の強化（かじばタブ内 サブタブ）</div>
+    <div class="tw"><table>
+      <tr><th>項目</th><th>効果</th><th>Lv上限</th></tr>
+      <tr><td class="nm">🔨 ハンマースキル</td><td>鍛造ミニゲームの打ち回数 +1/Lv（鍛冶場Lvとは別）</td><td>Lv10</td></tr>
+      <tr><td class="nm">⛏ 採掘スキル</td><td>各ステータス上昇幅 +5〜10%/Lv</td><td>Lv10</td></tr>
+      <tr><td class="nm">⏱ 手際</td><td>時間コスト短縮（24時間制移行後に本格適用）</td><td>Lv5</td></tr>
+    </table></div>
+  </div>
+  <div class="sec">
+    <div class="sec-t">工房の強化</div>
+    <div class="tw"><table>
+      <tr><th>項目</th><th>効果</th><th>解放条件</th></tr>
+      <tr><td class="nm">🔥 かまど</td><td>完成品品質上限↑（+1グレード/2Lv）</td><td>最初から</td></tr>
+      <tr><td class="nm">📚 工房書架</td><td>依頼完了EXP +10%/Lv</td><td>工房Lv3</td></tr>
+      <tr><td class="nm">🏷 看板</td><td>売値 +5%/Lv</td><td>工房Lv2</td></tr>
+      <tr><td class="nm">⭐ 名声飾り</td><td>依頼完了名声PT +5/Lv</td><td>工房Lv4</td></tr>
+      <tr><td class="nm">🔮 魔法炉</td><td>上級金属7種の加工が可能に（加工屋も含む）</td><td class="bd">工房Lv5・5000G</td></tr>
+      <tr><td class="nm">🔧 第2スロット</td><td>同時2本鍛造可能</td><td class="bd">工房Lv7・3000G</td></tr>
+    </table></div>
+  </div>
+  <div class="sec">
+    <div class="sec-t">名声ランク</div>
+    <div class="tw"><table>
+      <tr><th>ランク</th><th>星表示</th><th>必要PT</th><th>ボーナス</th></tr>
+      <tr><td>むめい</td><td>☆☆☆☆☆</td><td>0</td><td>なし</td></tr>
+      <tr><td>しんじん</td><td>★☆☆☆☆</td><td>100</td><td>依頼+5%</td></tr>
+      <tr><td>いっぱん</td><td>★★☆☆☆</td><td>300</td><td>依頼+10%・割引</td></tr>
+      <tr><td>ちゅうけん</td><td>★★★☆☆</td><td>600</td><td>レア依頼解放</td></tr>
+      <tr><td>めいこう</td><td>★★★★☆</td><td>1000</td><td>伝説依頼解放</td></tr>
+      <tr><td>たいか</td><td>★★★★★</td><td>1500</td><td>全店20%引</td></tr>
+      <tr><td>でんせつ</td><td>★★★★★+</td><td>2200</td><td>全コンテンツ解放</td></tr>
+    </table></div>
+  </div>
+</div>
+
+<!-- ====== 経済 ====== -->
+<div class="panel" id="p-economy">
+  <div class="sec">
+    <div class="sec-t">売値計算</div>
+    <div class="formula">
+      売値 = 素材費用合計 × 1.5 × <span class="v">品質倍率</span> × <span class="v">販売ルート倍率</span><br><br>
+      品質倍率：G=0.8 / D=1.1 / C=1.3 / B=1.6 / A=2.0 / S=3.0 / SS=4.5 / ★=7.0 / ★★=10 / ★★★=15<br>
+      ルート：露店=0.8 / 店売り=1.0 / ブランド=1.3 / 依頼=1.5〜2.0 / 郵便依頼=1.8〜2.5
+    </div>
+    <div class="tw"><table>
+      <tr><th>依頼達成内容</th><th>売値倍率</th><th>名声PT</th><th>EXP</th><th>特典</th></tr>
+      <tr><td>ボーダー達成</td><td class="ok">×1.5</td><td class="ok">+10</td><td class="ok">+50</td><td></td></tr>
+      <tr><td>期待を超えた</td><td class="gd">×1.8</td><td class="gd">+25</td><td class="gd">+120</td><td class="nt">まれにアイテム</td></tr>
+      <tr><td>大幅に超えた</td><td class="gd">×2.0</td><td class="gd">+50</td><td class="gd">+200</td><td class="nt">希少素材・スキル書</td></tr>
+      <tr><td>郵便依頼（貴族・王族）</td><td class="gd">×2.5</td><td class="gd">+80〜200</td><td class="gd">+300</td><td class="nt">称号・特別素材</td></tr>
+    </table></div>
+  </div>
+</div>
+
+<!-- ====== 依頼 ====== -->
+<div class="panel" id="p-orders">
+  <div class="sec">
+    <div class="sec-t">依頼書のボーダー言語</div>
+    <div class="note">依頼書にはざっくりした言語のみ。相談（1フェーズ）で詳細が開示される。名声ランク↑で開示精度↑。</div>
+    <div class="tw"><table>
+      <tr><th>依頼書の言語</th><th>意味するグレード帯</th><th>相談後（名声ランクで開示）</th></tr>
+      <tr><td class="nm">こわれにくいもの</td><td>HP C以上</td><td class="nt">★1↑：「HP B以上あると喜ぶ」</td></tr>
+      <tr><td class="nm">するどいもの</td><td>ATK C以上</td><td class="nt">★2↑：「ATK B+以上が理想」</td></tr>
+      <tr><td class="nm">じょうぶなもの</td><td>HP D・ATK D以上</td><td class="nt">★1↑：「総合C以上あれば文句ない」</td></tr>
+      <tr><td class="nm">かるくてはやいもの</td><td>SPD C以上</td><td class="nt">★2↑：「CRIT B以上も欲しい」</td></tr>
+      <tr><td class="nm">ごうかなもの</td><td>総合A以上</td><td class="nt">★3↑で全詳細開示</td></tr>
+      <tr><td class="nm">なんでもいい</td><td>G以上</td><td class="nt">相談不要</td></tr>
+    </table></div>
+  </div>
+  <div class="sec">
+    <div class="sec-t">依頼の受付場所</div>
+    <div class="tw"><table>
+      <tr><th>場所</th><th>相談</th><th>報酬倍率</th><th>依頼の種類</th></tr>
+      <tr><td class="nm">ギルド酒場</td><td class="gd">できる（1フェーズ）</td><td class="ok">×1.5〜1.8</td><td class="nt">冒険者・傭兵・一般市民</td></tr>
+      <tr><td class="nm">鍛冶場（直接来客）</td><td class="gd">できる（0フェーズ）</td><td class="ok">×1.5〜2.0</td><td class="nt">常連・職人・農民</td></tr>
+      <tr><td class="nm">郵便受け（鍛冶場）</td><td class="bd">できない</td><td class="gd">×1.8〜2.5</td><td class="nt">貴族・王族（情報収集でヒントあり）</td></tr>
+    </table></div>
+  </div>
+</div>
+
+<!-- ====== 命名 ====== -->
+<div class="panel" id="p-name">
+  <div class="sec">
+    <div class="sec-t">武器名・説明の自動生成ルール</div>
+    <div class="tw"><table>
+      <tr><th>パターン</th><th>形式</th><th>例</th></tr>
+      <tr><td>通常</td><td>素材名＋の＋武器種名</td><td class="nm">鉄のロングソード</td></tr>
+      <tr><td>骨シリーズ</td><td>骨装/ボーン/霊骨＋武器種</td><td class="nm">ボーンブレード</td></tr>
+      <tr><td>呪い（×1-2）</td><td>不穏な/呪われた＋通常名</td><td class="nm">不穏な鉄の小刀</td></tr>
+      <tr><td>呪い（×3）</td><td>狂った＋通常名</td><td class="nm">狂った鉄のサイドソード</td></tr>
+      <tr><td>呪い（×4）</td><td>邪悪な＋通常名</td><td class="nm">邪悪な鉄のショートソード</td></tr>
+      <tr><td>呪い（×5）</td><td>混沌の＋武器種</td><td class="nm">混沌の刃</td></tr>
+      <tr><td>骨＋呪い</td><td>呪骨＋武器種</td><td class="nm">呪骨剣</td></tr>
+    </table></div>
+    <div class="note">
+      <b>説明文生成：</b><br>
+      ①素材説明（固定）→ ②武器種説明（固定）→ ③素材特徴（自動選択）→ ④仕上げ文（S以上のみ）<br><br>
+      <b>固有名システム：</b>お気に入り登録時のみ名前入力可能。名前をつけた武器のみ生涯ログに登録される。<br>
+      呪い武器は名前入力後に呪い内容が初めて開示される。
+    </div>
+  </div>
+</div>
+
+<!-- ====== 未実装 ====== -->
+<div class="panel" id="p-todo">
+  <div class="sec">
+    <div class="sec-t">実装ステータス一覧</div>
+    <div class="tw"><table>
+      <tr><th>機能</th><th>状態</th><th>備考</th></tr>
+      <tr><td>タイトル画面</td><td><span class="st-done">✓ 実装済み</span></td><td></td></tr>
+      <tr><td>4画面ナビ（かじば/まち/ぼうけん/きろく）</td><td><span class="st-done">✓ 実装済み</span></td><td></td></tr>
+      <tr><td>背景画像（4枚）</td><td><span class="st-done">✓ 実装済み</span></td><td></td></tr>
+      <tr><td>HUD（金・日付・名声）</td><td><span class="st-done">✓ 実装済み</span></td><td>長押し詳細あり</td></tr>
+      <tr><td>1日リザルトオーバーレイ</td><td><span class="st-done">✓ 実装済み</span></td><td></td></tr>
+      <tr><td>かじば：たんぞうモード選択</td><td><span class="st-done">✓ 実装済み</span></td><td>依頼/量産の2モード</td></tr>
+      <tr><td>かじば：カテゴリ→品目→素材選択</td><td><span class="st-done">✓ 実装済み</span></td><td></td></tr>
+      <tr><td>かじば：在庫・素材おきば</td><td><span class="st-done">✓ 実装済み</span></td><td>長押し詳細あり</td></tr>
+      <tr><td>かじば：工房強化UI</td><td><span class="st-done">✓ 実装済み</span></td><td></td></tr>
+      <tr><td>焼き入れミニゲーム</td><td><span class="st-done">✓ 実装済み</span></td><td>水/油/バナナの葉</td></tr>
+      <tr><td>まち：ギルド/みせ/NPC/イベントタブ</td><td><span class="st-done">✓ 実装済み</span></td><td></td></tr>
+      <tr><td>ぼうけん：エリア/はけん/さいくつ</td><td><span class="st-done">✓ 実装済み</span></td><td></td></tr>
+      <tr><td>きろく：統計/もちもの/エンディング/設定</td><td><span class="st-done">✓ 実装済み</span></td><td></td></tr>
+      <tr><td>素材数×柄長による武器種自動決定</td><td><span class="st-tbd">✗ 未実装</span></td><td>設計書は完成</td></tr>
+      <tr><td>鍛造ミニゲーム（3×4グリッド叩き）</td><td><span class="st-done">✓ 実装済み</span></td><td>blacksmith_full.html に完全実装済み。統合待ち。</td></tr>
+      <tr><td>呪いシステム（ランダム移動）</td><td><span class="st-tbd">✗ 未実装</span></td><td>設計は完成</td></tr>
+      <tr><td>骨シリーズ（組み合わせ武器）</td><td><span class="st-tbd">✗ 未実装</span></td><td>設計は完成</td></tr>
+      <tr><td>グレード23段階の評価計算</td><td><span class="st-wip">△ 一部実装</span></td><td>UI表示のみ</td></tr>
+      <tr><td>依頼システム（ボーダー・相談）</td><td><span class="st-tbd">✗ 未実装</span></td><td>設計は完成</td></tr>
+      <tr><td>加工屋/精錬所（機能）</td><td><span class="st-tbd">✗ 未実装</span></td><td>UIのみ</td></tr>
+      <tr><td>傭兵派遣（機能）</td><td><span class="st-tbd">✗ 未実装</span></td><td>UIのみ</td></tr>
+      <tr><td>武器固有名・生涯ログ</td><td><span class="st-tbd">✗ 未実装</span></td><td>設計は完成</td></tr>
+      <tr><td>防具カテゴリ（鍛造に統合）</td><td><span class="st-tbd">✗ 未実装</span></td><td>設計は完成</td></tr>
+      <tr><td>新聞機能</td><td><span class="st-tbd">✗ 未実装（予定）</span></td><td></td></tr>
+      <tr><td>24時間制への移行</td><td><span class="st-tbd">✗ 未実装（予定）</span></td><td>手際スキルと連動</td></tr>
+      <tr><td>ストーリー・命を宿した金属</td><td><span class="st-tbd">✗ 設計中</span></td><td></td></tr>
+    </table></div>
+  </div>
+</div>
+
+<script>
+function T(id, tab) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('p-' + id).classList.add('active');
+  tab.classList.add('active');
+}
+</script>
+</body>
+</html>
